@@ -252,11 +252,13 @@ ExtraElecsimString = ""
 if SPMTsActivation == "false" :
     ExtraElecsimString += " --disableSPMT"
 if LPMTsActivation == "false" :
-     ExtraElecsimString += " --disableLPMT"
+    ExtraElecsimString += " --disableLPMT"
 if TTSActivation == "false" :
-     ExtraElecsimString += " --disablePmtTTS"
+    ExtraElecsimString += " --disablePmtTTS"
 if NoiseActivation == "false" :
-     ExtraElecsimString += " --disableNoise"
+    ExtraElecsimString += " --disableNoise"
+if Threshold != 300 :
+    ExtraElecsimString += (" --StdTrigger_FiredPmtNum " + str(Threshold) )
 
 RateSpecies = str(0.001)
 
