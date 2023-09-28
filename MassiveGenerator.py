@@ -14,7 +14,7 @@ import argparse
 prs = argparse.ArgumentParser()           # parser name
 
 prs.add_argument("-name","--NameRun",help="Name of the run",required=True)
-prs.add_argument("-s","--Species", help="Which solar neutrino species (Be7, pep, CNO, pp, hep, N13, O15) \n or background species (Bi-210, Kr-85, Po-210, K-40, U-238, Th-232, C-11, C-10, He-6) or mono-energetic particles (mono) or reactor anti-neutrinos (antinu)")                 
+prs.add_argument("-s","--Species", help="Which solar neutrino species (Be7, pep, CNO, pp, hep, N13, O15) \n or background species (Bi-210, Kr-85, Po-210, K-40, U-238, Th-232, C-11, C-10, He-6) or mono-energetic particles (mono) or reactor anti-neutrinos (antinu)", required=True, choices=ExistingSpecies) 
 prs.add_argument("-runs", "--HowMany", help="How many rootfiles",type=int)
 prs.add_argument("-events", "--EventsPerRun", help="How many events per run",type=int)
 
