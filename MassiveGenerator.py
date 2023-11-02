@@ -84,8 +84,14 @@ TTSActivation=str(args.TTSActivation)
 NoiseActivation=str(args.NoiseActivation)
 
 if os.path.exists(NameRun) :
-    print("WARNING : A run named " + NameRun + " already exists, want to continue anyway?")
-    ManageWarning()
+	print("WARNING : A run named " + NameRun + " already exists, want to continue anyway?")
+	response = input("Print y/n: ")
+	if(response == 'n'):
+		print("Aborted.")
+		sys.exit()
+	else:
+		print("Not interrupted.")
+
 
 if (SPMTsActivation == "false" and LPMTsActivation == "false") :
     print("WARNING: Are you sure you want to deactivate both large and small PMTs ?")
@@ -93,8 +99,6 @@ if (SPMTsActivation == "false" and LPMTsActivation == "false") :
 
 if (int(Threshold) < 200) :
     print("WARNING: Lowering the threshold to " + str(Threshold) + " could raise issues in the simulation, especially if you did not disactivate white noise, want to continue anyway?")
-    ManageWarning()
-
 
 CurrentFolder = os.getcwd()
 
@@ -119,10 +123,15 @@ if( Species == 'nuclear'):
 	lineSpecies = 'gendecay --nuclear ' + Isotope
 
 if( Species.startswith('calib') ):
-	parts = Species.split("_", 6)
-	if(parts[2] == 'ACU'):
+	calib_parts = Species.split("_", 6)
+	if(calib_parts[2] == 'ACU'):
 		InsertionSystem = "--ACU_source_weight_QC "
-	lineSpecies = InsertionSystem + ' --OffsetInX ' + parts[3] + ' --OffsetInY ' + parts[4] + ' --OffsetInZ ' + parts[5] + ' gun --particles /cvmfs/juno.ihep.ac.cn/centos7_amd64_gcc830/Pre-Release/J22.1.0-rc4/offline/Examples/Tutorial/share/mac/config/' + parts[1] + '.conf '  
+	if(calib_parts[2] == 'CLS'):
+		InsertionSystem = "--CLS_source_weight_QC "
+	if(calib_parts[2] == 'ROV'):
+		InsertionSystem = "--submarine "
+
+	lineSpecies = InsertionSystem + ' --OffsetInX ' + calib_parts[3] + ' --OffsetInY ' + calib_parts[4] + ' --OffsetInZ ' + calib_parts[5] + ' gun --particles /cvmfs/juno.ihep.ac.cn/centos7_amd64_gcc830/Pre-Release/J22.1.0-rc4/offline/Examples/Tutorial/share/mac/config/' + calib_parts[1] + '.conf '  
 
 if( (Species == 'Be7') or (Species == 'pep') or (Species == 'hep') or (Species == 'B8') or (Species == 'pp') or (Species =='N13') or (Species == 'O15')):
     lineSpecies = 'nusol --type ' + Species
@@ -232,16 +241,16 @@ for i in range(0,int(HowMany)):
     print(filename)
     of = open(filename,"w")
 
-    Output_DetSimEDM    = os.getcwd() + '/root/' + NameRun + '_detsim_r'  + '_' + str(i).zfill(4) + '.root'
-    Output_DetSimUser   = os.getcwd() + '/root/' + NameRun + '_detsim_user_r' + '_' + str(i).zfill(4) + '.root'
-    Output_ElecEDM      = os.getcwd() + '/root/' + NameRun + '_elecsim_r' + '_' + str(i).zfill(4) + '.root'
-    Output_ElecUser     = os.getcwd() + '/root/' + NameRun + '_elecsim_user_r'  + '_' + str(i).zfill(4) + '.root'
-    Output_CalibEDM     = os.getcwd() + '/root/' + NameRun + '_calib_r'  + '_' + str(i).zfill(4) + '.root'
-    Output_CalibUser    = os.getcwd() + '/root/' + NameRun + '_calib_user_r'  + '_' + str(i).zfill(4) + '.root'
-    Output_RecEDM       = os.getcwd() + '/root/' + NameRun + '_rec_r'  + '_' + str(i).zfill(4) + '.root'
-    Output_RecUser      = os.getcwd() + '/root/' + NameRun + '_rec_user_r'  + '_' + str(i).zfill(4) + '.root'
-    Output_DetSim_Log   = os.getcwd() + '/root/' + NameRun + '_detsim_user_r'  + '_' + str(i).zfill(4) + '.root'
-    Output_Log          = os.getcwd() + '/log/'  + NameRun + '_rec_user_r' + '_' + str(i).zfill(4) + '.log'
+    Output_DetSimEDM    = os.getcwd() + '/root/' + NameRun + '_detsim_'  + str(i).zfill(4) + '.root'
+    Output_DetSimUser   = os.getcwd() + '/root/' + NameRun + '_detsim_user_' + str(i).zfill(4) + '.root'
+    Output_ElecEDM      = os.getcwd() + '/root/' + NameRun + '_elecsim_' + str(i).zfill(4) + '.root'
+    Output_ElecUser     = os.getcwd() + '/root/' + NameRun + '_elecsim_user_' + str(i).zfill(4) + '.root'
+    Output_CalibEDM     = os.getcwd() + '/root/' + NameRun + '_calib_' + str(i).zfill(4) + '.root'
+    Output_CalibUser    = os.getcwd() + '/root/' + NameRun + '_calib_user_' + str(i).zfill(4) + '.root'
+    Output_RecEDM       = os.getcwd() + '/root/' + NameRun + '_rec_' + str(i).zfill(4) + '.root'
+    Output_RecUser      = os.getcwd() + '/root/' + NameRun + '_rec_user_' + str(i).zfill(4) + '.root'
+    Output_DetSim_Log   = os.getcwd() + '/log/' + NameRun + '_detsim_user_' + str(i).zfill(4) + '.log'
+    Output_Log          = os.getcwd() + '/log/'  + NameRun + '_rec_user_' + str(i).zfill(4) + '.log'
     
     if i!=0:
         DetsimPathsFile.write("\n")
@@ -273,7 +282,6 @@ for i in range(0,int(HowMany)):
     	of.write('\nsleep 10\n')
     
     if( elec2rec == 'true'):
-    #    of.write('python /cvmfs/juno.ihep.ac.cn/centos7_amd64_gcc1120/Pre-Release/J23.1.0-rc0/junosw/Examples/Tutorial/share/tut_elec2rec.py --input ' + Output_DetSimEDM + ' --output ' + Output_RecEDM + ' --user-output ' + Output_RecUser + ' --evtmax -1 --Trigger_Mode ' + TriggerMode + ' --rate ' + RateSpecies + ' --seed ' + str(random.randint(1e6,1e7)) + ' --elec yes --method energy-point --simfile ' + Output_DetSimUser + ' --enableReadTruth --enableUseTLHVertex --enableTimeInfo --enableLTSPEs --evtrec >& ' + Output_Log + '\n')
         of.write('python /cvmfs/juno.ihep.ac.cn/centos7_amd64_gcc1120/Pre-Release/J23.1.0-rc0/junosw/Examples/Tutorial/share/tut_elec2rec.py --input ' + Output_DetSimEDM + ' --output ' + Output_RecEDM + ' --user-output ' + Output_RecUser + ' --evtmax -1 --Trigger_Mode ' + TriggerMode + ' --rate ' + RateSpecies + ' --seed ' + str(random.randint(1e6,1e7)) + ' --elec yes --enableReadTruth --method energy-point --simfile ' + Output_DetSimUser + ' --enableTimeInfo --enableUseEkMap --enableLTSPEs >& ' + Output_Log + '\n')
 
     of.close()
@@ -283,7 +291,7 @@ DetsimPathsFile.close()
 RecPathsFile.close()
 
 for i in range(0,int(HowMany)):
-    filename = 'Launch_' + NameRun + '_' + str(i).zfill(4) + '_' + '.sub'
+    filename = 'Launch_' + NameRun + '_' + str(i).zfill(4) + '.sub'
     print(filename)
     of = open('sub/' + filename,"w")
     of.write('universe = vanilla\n')
