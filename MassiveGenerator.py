@@ -8,11 +8,13 @@ import os
 import random
 import sys
 import argparse
+from argparse import RawTextHelpFormatter
 
-prs = argparse.ArgumentParser()           # parser name
+prs = argparse.ArgumentParser(formatter_class=RawTextHelpFormatter)           # parser name
 
 prs.add_argument("-name","--NameRun",help="Name of the run",required=True)
-prs.add_argument("-s","--Species", help="Which solar neutrino species \n or background species (Bi-210, Kr-85, Po-210, K-40, U-238, Th-232, C-11, C-10, He-6) \n or mono-energetic particles (mono) or reactor anti-neutrinos (antinu) \n or calib source (usage: calib_isotope_ACU/CLS/GT_coordinates. Example: calib_Sr85_ACU_0_0_0 )")                 
+prs.add_argument("-s","--Species", help="solar neutrino species (Be7, pep, hep, B8, pp, N13, O15) \n or background species (Bi-210, Kr-85, Po-210, K-40, U-238, Th-232, C-11, C-10, He-6) \n or mono-energetic particles (mono) or reactor anti-neutrinos (antinu) \n or calib source possible sources: Am241, BiPo214, Ce137, Co60, Ga68, Hg203, Kr85, Pb210, Sr85, U238, BiPo212, C14, Co57, Cs137, Ge68, K40, Mn54, Rn222, Th232 (usage: calib_isotope_ACU/CLS/GT_coordinates. Example: calib_Sr85_ACU_0_0_0 )")
+                 
 prs.add_argument("-isotope", "--Isotope", help="Isotope decaying")
 prs.add_argument("-runs", "--HowMany", help="How many rootfiles",type=int)
 prs.add_argument("-events", "--EventsPerRun", help="How many events per run",type=int)
@@ -26,7 +28,7 @@ prs.add_argument("-volume-radius-max","--VolumeRadiusMax", default=17000, type=f
 
 prs.add_argument("-particle-energy", "--ParticleEnergy", help="Particle Kinetic energy (only if Species=mono); default 1.0MeV", default=1.0, type=float)
 prs.add_argument("-energy-mode","--EnergyMode",help="If you want to generate energy with smear (only if Species=mono), Possibilities: Range, Gaus, delta; default=delta",default="delta")
-prs.add_argument("-energy-extra-parameter","--EnergyExtraParameter",help="Only if EnergyMode is Range or Gaus. If EnergyMode=Range -> particles energy is uniformely distributed between [ParticleEnergy; EnergyExtraParameter]. If EnergyMode=Gaus -> particles energy is gaussianly distributed with mu=ParticleEnergy and sigma=EnergyExtraParameter",default=0.)             
+prs.add_argument("-energy-extra-parameter","--EnergyExtraParameter",help="Only if EnergyMode is Range or Gaus. \n If EnergyMode=Range -> particles energy is uniformely distributed between [ParticleEnergy; EnergyExtraParameter]. \n If EnergyMode=Gaus -> particles energy is gaussianly distributed with mu=ParticleEnergy and sigma=EnergyExtraParameter",default=0.)             
 prs.add_argument("-particle-type", "--ParticleType", help="Particle type (only if Species=mono); default e-", default='e-')             
 prs.add_argument("-mass-ordering", "--MassOrdering", help="Neutrino mass ordering for simulations (only if Species=antinu); Possibilities: normal or inverted; default: normal",default='normal')
 prs.add_argument("-elec2rec", "--elec2rec", help="is elec2rec used?; default true", default='true')             
