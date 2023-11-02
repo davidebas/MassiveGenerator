@@ -9,14 +9,11 @@ import random
 import sys
 import argparse
 
-#Threshold = str(200)
-
 prs = argparse.ArgumentParser()           # parser name
 
-ExistingSpecies=["Be7","pep","CNO","pp","hep","N13","015","Bi-210","Kr-85","Po-210","K-40","U-238","Th-232","C-11","C-10","He-6","mono","antinu"]
-
 prs.add_argument("-name","--NameRun",help="Name of the run",required=True)
-prs.add_argument("-s","--Species", help="Which solar neutrino species (Be7, pep, CNO, pp, hep, N13, O15) \n or background species (Bi-210, Kr-85, Po-210, K-40, U-238, Th-232, C-11, C-10, He-6) or mono-energetic particles (mono) or reactor anti-neutrinos (antinu)", required=True, choices=ExistingSpecies) 
+prs.add_argument("-s","--Species", help="Which solar neutrino species \n or background species (Bi-210, Kr-85, Po-210, K-40, U-238, Th-232, C-11, C-10, He-6) \n or mono-energetic particles (mono) or reactor anti-neutrinos (antinu) \n or calib source (usage: calib_isotope_ACU/CLS/GT_coordinates. Example: calib_Sr85_ACU_0_0_0 )")                 
+prs.add_argument("-isotope", "--Isotope", help="Isotope decaying")
 prs.add_argument("-runs", "--HowMany", help="How many rootfiles",type=int)
 prs.add_argument("-events", "--EventsPerRun", help="How many events per run",type=int)
 
@@ -51,12 +48,12 @@ prs.add_argument("-LPMT","--ActivationLargePMTs",help="Enable the large PMTs; de
 prs.add_argument("-TTS","--TTSActivation",help="Activate the Transit Time Spread of the PMTs; default: true",default="true",choices=["true","false"])
 prs.add_argument("-noise","--NoiseActivation",help="Activate the white noise of the PMTs; default: true",default="true",choices=["true","false"])
 
-
 args = prs.parse_args()
 
 NameRun = str(args.NameRun) #name of the run, required
 
 Species = str(args.Species)
+Isotope = str(args.Isotope)
 HowMany = args.HowMany
 EventsPerRun = str(args.EventsPerRun)
 Threshold = str(args.threshold)
@@ -118,6 +115,15 @@ if( Species == 'mono'):
 
     lineSpecies+= ' --momentums-interp KineticEnergy'
 
+if( Species == 'nuclear'):
+	lineSpecies = 'gendecay --nuclear ' + Isotope
+
+if( Species.startswith('calib') ):
+	parts = Species.split("_", 6)
+	if(parts[2] == 'ACU'):
+		InsertionSystem = "--ACU_source_weight_QC "
+	lineSpecies = InsertionSystem + ' --OffsetInX ' + parts[3] + ' --OffsetInY ' + parts[4] + ' --OffsetInZ ' + parts[5] + ' gun --particles /cvmfs/juno.ihep.ac.cn/centos7_amd64_gcc830/Pre-Release/J22.1.0-rc4/offline/Examples/Tutorial/share/mac/config/' + parts[1] + '.conf '  
+
 if( (Species == 'Be7') or (Species == 'pep') or (Species == 'hep') or (Species == 'B8') or (Species == 'pp') or (Species =='N13') or (Species == 'O15')):
     lineSpecies = 'nusol --type ' + Species
 
@@ -173,13 +179,19 @@ print('cd ' + NameRun)
 os.chdir(os.getcwd() + '/' + NameRun)
 
 if GenerateCenter=="false":
-    VolumeRadiusString = " --volume pTarget --material LS --volume-radius-max " + VolumeRadiusMax
+    if Species.startswith('calib'):
+    	VolumeRadiusString = " --material LS --volume pSource --material Analcime "
+    
+    else:
+    	VolumeRadiusString = " --volume pTarget --material LS --volume-radius-max " + VolumeRadiusMax
+	
     if (VolumeRadiusMin!="0"): 
         VolumeRadiusString += " --volume-radius-min " + VolumeRadiusMin
 else:
     VolumeRadiusString=""
     VolumeRadiusMax="0"
 
+	
 
 CherenkovString=" "
 if CherenkovYieldFactor=="0.0":
@@ -209,10 +221,6 @@ if UseSheldonEmissionSpectrum=="true":
 
 if UseSheldonFluorescenceTimes=="true":
 	ReplaceString+=(",Material.LS.NeutronCONSTANT:/storage/gpfs_data/juno/junofs/users/mmalabarba/modified_LS_properties/NeutronCONSTANT,Material.LS.AlphaCONSTANT:/storage/gpfs_data/juno/junofs/users/mmalabarba/modified_LS_properties/AlphaCONSTANT,Material.LS.GammaCONSTANT:/storage/gpfs_data/juno/junofs/users/mmalabarba/modified_LS_properties/GammaCONSTANT")
-
-
-
-
 
 RateSpecies = str(0.001)
 
